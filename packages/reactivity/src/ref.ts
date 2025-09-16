@@ -1,78 +1,43 @@
+import { type Link, type ReactiveRef, ReactiveFlags } from './types'
 import { activeSub } from './effect'
+import { link, propagate } from './system'
 
-enum ReactiveFlags {
-  IS_REF = '__v_isRef',
+function trackRef(dep: ReactiveRef) {
+  if (activeSub) {
+    link(dep, activeSub)
+  }
 }
 
-interface Link {
-  sub: () => any
-  nextSub: Link
-  prevSub: Link
+function triggerRef(dep: ReactiveRef) {
+  if (dep.subs) {
+    propagate(dep.subs)
+  }
 }
 
-class RefImpl {
+class RefImpl<T> implements ReactiveRef<T> {
   [ReactiveFlags.IS_REF] = true
-  _value
+  _value: T
 
-  sub: Link
+  subs: Link
   subTail: Link
 
-  constructor(value) {
+  constructor(value: T) {
     this._value = value
   }
 
-  private createLink(sub: Link['sub']) {
-    return {
-      sub,
-      nextSub: null,
-      prevSub: null,
-    }
-  }
-
-  private track() {
-    if (activeSub) {
-      const newLink = this.createLink(activeSub)
-
-      if (this.subTail) {
-        this.subTail.nextSub = newLink
-        newLink.prevSub = this.subTail
-      } else {
-        this.sub = newLink
-      }
-
-      this.subTail = newLink
-    }
-  }
-
-  private trigger() {
-    const queuedEffect = []
-    let link = this.sub
-
-    while (link) {
-      queuedEffect.push(link.sub)
-      link = link.nextSub
-    }
-
-    queuedEffect.forEach(sub => {
-      if (typeof sub === 'function') {
-        sub()
-      }
-    })
-  }
-
   get value() {
-    this.track()
+    trackRef(this)
 
     return this._value
   }
 
   set value(newVal) {
     this._value = newVal
-    this.trigger()
+    triggerRef(this)
   }
 }
 
-export function ref(value) {
+export function ref<T>(value: T) {
   return new RefImpl(value)
 }
 
