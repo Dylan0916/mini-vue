@@ -6,11 +6,13 @@ export class ReactiveEffect implements Effect {
   constructor(public fn: () => any) {}
 
   run() {
+    const prevSub = activeSub
+
     activeSub = this
     try {
       return this.fn()
     } finally {
-      activeSub = null
+      activeSub = prevSub
     }
   }
 }
