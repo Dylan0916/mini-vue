@@ -18,4 +18,6 @@ export interface ReactiveRef<T = any> {
 
 export interface Effect {
   run: () => any
+  schedule: () => void
+  notify: () => void
 }

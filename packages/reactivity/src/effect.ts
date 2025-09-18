@@ -15,10 +15,25 @@ export class ReactiveEffect implements Effect {
       activeSub = prevSub
     }
   }
+
+  schedule() {
+    this.run()
+  }
+
+  notify() {
+    this.schedule()
+  }
 }
 
-export function effect(fn: () => any) {
+export function effect(fn: () => any, options?: Pick<Effect, 'schedule'>) {
   const effect = new ReactiveEffect(fn)
 
+  Object.assign(effect, options)
   effect.run()
+
+  const runner = () => effect.run()
+
+  runner.effect = effect
+
+  return runner
 }

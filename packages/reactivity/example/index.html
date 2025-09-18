@@ -6,22 +6,19 @@
   <title>Document</title>
 </head>
 <body>
+  <script src="https://cdn.jsdelivr.net/npm/es-toolkit@%5E1"></script>
   <script type="module">
     import { ref, effect } from '../dist/reactivity.esm.js'
 
     const count = ref(0)
 
+    const schedule = _.debounce(() => {
+      effect1()
+    }, 1000)
+
     const effect1 = effect(()=>{
-      const effect2 = effect(()=>{
-        // const effect3 = effect(()=>{
-        //   console.log('3 Effect', count.value)
-        // })
-
-        console.log('2 Effect', count.value)
-      })
-
       console.log('1 Effect', count.value)
-    })
+    }, { schedule })
 
     // effect(() => {
     //   console.log('effect2', count.value)
@@ -29,7 +26,9 @@
 
     setTimeout(() => {
       console.log('setTimeout')
-      count.value++
+      count.value = 1
+      count.value = 2
+      count.value = 3
     }, 1000)
   </script>
 </body>

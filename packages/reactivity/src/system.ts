@@ -31,6 +31,6 @@ export function propagate(subs: Link) {
   }
 
   queuedEffect.forEach(sub => {
-    sub.run()
+    sub.notify()
   })
 }
