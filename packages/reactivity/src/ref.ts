@@ -1,20 +1,21 @@
-import { type Link, type ReactiveRef, ReactiveFlags } from './types'
+import type { Link, Dep } from './types'
+import { ReactiveFlags } from './constants'
 import { activeSub } from './effect'
 import { link, propagate } from './system'
 
-function trackRef(dep: ReactiveRef) {
+function trackRef(dep: Dep) {
   if (activeSub) {
     link(dep, activeSub)
   }
 }
 
-function triggerRef(dep: ReactiveRef) {
+function triggerRef(dep: Dep) {
   if (dep.subs) {
     propagate(dep.subs)
   }
 }
 
-class RefImpl<T> implements ReactiveRef<T> {
+class RefImpl<T> implements Dep<T> {
   [ReactiveFlags.IS_REF] = true
   _value: T
 
@@ -41,6 +42,6 @@ export function ref<T>(value: T) {
   return new RefImpl(value)
 }
 
-export function isRef(value) {
+export function isRef<T>(value: T) {
   return !!(value && value[ReactiveFlags.IS_REF])
 }

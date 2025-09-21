@@ -1,14 +1,14 @@
-export enum ReactiveFlags {
-  IS_REF = '__v_isRef',
-}
+import { ReactiveFlags } from './constants'
 
 export interface Link {
-  sub: Effect
-  nextSub: Link
-  prevSub: Link
+  dep: Dep | null
+  sub: Sub | null
+  nextDep: Link | null
+  prevSub: Link | null
+  nextSub: Link | null
 }
 
-export interface ReactiveRef<T = any> {
+export interface Dep<T = any> {
   [ReactiveFlags.IS_REF]: boolean
   _value: T
   subs: Link
@@ -16,7 +16,9 @@ export interface ReactiveRef<T = any> {
   value: T
 }
 
-export interface Effect {
+export interface Sub {
+  deps: Link
+  depsTail: Link
   run: () => any
   schedule: () => void
   notify: () => void

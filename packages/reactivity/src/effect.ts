@@ -1,14 +1,18 @@
-import { type Effect } from './types'
+import type { Link, Sub } from './types'
 
-export let activeSub: Effect | null = null
+export let activeSub: Sub | null = null
 
-export class ReactiveEffect implements Effect {
+export class ReactiveEffect implements Sub {
+  deps: Link = null
+  depsTail: Link = null
+
   constructor(public fn: () => any) {}
 
   run() {
     const prevSub = activeSub
 
     activeSub = this
+    this.depsTail = null
     try {
       return this.fn()
     } finally {
@@ -25,7 +29,7 @@ export class ReactiveEffect implements Effect {
   }
 }
 
-export function effect(fn: () => any, options?: Pick<Effect, 'schedule'>) {
+export function effect(fn: () => any, options?: Pick<Sub, 'schedule'>) {
   const effect = new ReactiveEffect(fn)
 
   Object.assign(effect, options)
