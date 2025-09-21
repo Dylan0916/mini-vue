@@ -12,7 +12,7 @@ export class ReactiveEffect implements Sub {
     const prevSub = activeSub
 
     activeSub = this
-    this.depsTail = null
+    // this.depsTail = null
     try {
       return this.fn()
     } finally {

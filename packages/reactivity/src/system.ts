@@ -12,8 +12,7 @@ function _createLink(dep: Dep, sub: Sub): Link {
 
 function _appendDepLink(sub: Sub, newLink: Link) {
   if (sub.depsTail) {
-    sub.depsTail.nextSub = newLink
-    newLink.prevSub = sub.depsTail
+    sub.depsTail.nextDep = newLink
   } else {
     sub.deps = newLink
   }
@@ -31,6 +30,15 @@ function _appendSubLink(dep: Dep, newLink: Link) {
 }
 
 export function link(dep: Dep, sub: Sub) {
+  // let currentDep = sub.deps
+
+  // while (currentDep) {
+  //   if (currentDep.dep === dep) {
+  //     return
+  //   }
+  //   currentDep = currentDep.nextDep
+  // }
+
   const currentDep = sub.depsTail
   const isLinkReuse = sub.deps && currentDep === null
 
