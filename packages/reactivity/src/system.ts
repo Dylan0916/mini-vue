@@ -30,23 +30,12 @@ function _appendSubLink(dep: Dep, newLink: Link) {
 }
 
 export function link(dep: Dep, sub: Sub) {
-  // let currentDep = sub.deps
-
-  // while (currentDep) {
-  //   if (currentDep.dep === dep) {
-  //     return
-  //   }
-  //   currentDep = currentDep.nextDep
-  // }
-
   const currentDep = sub.depsTail
-  const isLinkReuse = sub.deps && currentDep === null
+  const nextDep = currentDep === null ? sub.deps : currentDep.nextDep
 
-  if (isLinkReuse) {
-    if (sub.deps.dep === dep) {
-      sub.depsTail = sub.deps
-      return
-    }
+  if (nextDep?.dep === dep) {
+    sub.depsTail = nextDep
+    return
   }
 
   const newLink = _createLink(dep, sub)
