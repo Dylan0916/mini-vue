@@ -6,23 +6,41 @@
   <title>Document</title>
 </head>
 <body>
-  <button id="btn">按鈕</button>
+  <div id="app"></div>
+  <button id="flagBtn">update flag</button>
+  <button id="nameBtn">update name</button>
+  <button id="ageBtn">update age</button>
 
   <script src="https://cdn.jsdelivr.net/npm/es-toolkit@%5E1"></script>
   <script type="module">
     import { ref, effect } from '../dist/reactivity.esm.js'
 
     const flag = ref(true)
-    const count = ref(0)
+    const name = ref('姓名')
+    const age = ref(18)
+    let count = 0
 
-    effect(() => {
-      flag.value
-      count.value
+    const e = effect(() => {
       console.count('effect')
+
+      //  if(count>0) return
+      //  count++
+
+      if(flag.value){
+        app.innerHTML = name.value
+      }else{
+        app.innerHTML = age.value
+      }
     })
 
-    btn.onclick = () => {
-      count.value++
+    flagBtn.onclick = () => {
+      flag.value = !flag.value
+    }
+    nameBtn.onclick = () => {
+      name.value = '姓名' + Math.random()
+    }
+    ageBtn.onclick = () => {
+      age.value++
     }
   </script>
 </body>
