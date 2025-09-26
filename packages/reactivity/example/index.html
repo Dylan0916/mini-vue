@@ -23,8 +23,8 @@
     const e = effect(() => {
       console.count('effect')
 
-      //  if(count>0) return
-      //  count++
+       if(count>0) return
+       count++
 
       if(flag.value){
         app.innerHTML = name.value

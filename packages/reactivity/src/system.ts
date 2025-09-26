@@ -71,6 +71,10 @@ export function propagate(subs: Link) {
 }
 
 function clearTracking(link: Link) {
+  if (!link) {
+    return
+  }
+
   const { dep, nextDep, nextSub, prevSub } = link
 
   /**
@@ -105,8 +109,7 @@ function clearTracking(link: Link) {
   linkPool = link
 
   // 處理下一個要移除的節點
-  // 這行好像沒作用 (?)
-  link = nextDep
+  clearTracking(nextDep)
 }
 
 export function startTrack(sub: Sub) {
