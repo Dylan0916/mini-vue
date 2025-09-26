@@ -1,13 +1,25 @@
 import type { Link, Dep, Sub } from './types'
 
+let linkPool: Link | null = null
+
 function _createLink(dep: Dep, sub: Sub, nextDep: Link | null): Link {
-  return {
+  let newLink = {
     dep,
     sub,
     nextDep,
     nextSub: null,
     prevSub: null,
   }
+
+  if (linkPool) {
+    newLink = linkPool
+    linkPool = linkPool.nextDep
+    newLink.dep = dep
+    newLink.sub = sub
+    newLink.nextDep = nextDep
+  }
+
+  return newLink
 }
 
 function _appendDepLink(sub: Sub, newLink: Link) {
@@ -85,7 +97,12 @@ function clearTracking(link: Link) {
 
   link.dep = null
   link.sub = null
-  link.nextDep = null
+
+  /**
+   * 把不要的節點放回 linkPool 去復用
+   */
+  link.nextDep = linkPool
+  linkPool = link
 
   // 處理下一個要移除的節點
   // 這行好像沒作用 (?)
