@@ -19,6 +19,7 @@ export interface Dep<T = any> {
 export interface Sub {
   deps: Link
   depsTail: Link
+  tracking: boolean
   run: () => any
   schedule: () => void
   notify: () => void

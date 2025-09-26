@@ -6,6 +6,7 @@ export let activeSub: Sub | null = null
 export class ReactiveEffect implements Sub {
   deps: Link = null
   depsTail: Link = null
+  tracking = false
 
   constructor(public fn: () => any) {}
 

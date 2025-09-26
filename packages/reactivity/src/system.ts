@@ -61,7 +61,12 @@ export function propagate(subs: Link) {
   let link = subs
 
   while (link) {
-    queuedEffect.push(link.sub)
+    const { sub } = link
+
+    if (!sub.tracking) {
+      queuedEffect.push(sub)
+    }
+
     link = link.nextSub
   }
 
@@ -114,6 +119,7 @@ function clearTracking(link: Link) {
 
 export function startTrack(sub: Sub) {
   sub.depsTail = null
+  sub.tracking = true
 }
 
 export function endTrack(sub: Sub) {
@@ -128,4 +134,6 @@ export function endTrack(sub: Sub) {
     clearTracking(sub.deps)
     sub.deps = null
   }
+
+  sub.tracking = false
 }
