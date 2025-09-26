@@ -1,3 +1,4 @@
+import { startTrack, endTrack } from './system'
 import type { Link, Sub } from './types'
 
 export let activeSub: Sub | null = null
@@ -12,10 +13,11 @@ export class ReactiveEffect implements Sub {
     const prevSub = activeSub
 
     activeSub = this
-    this.depsTail = null
+    startTrack(this)
     try {
       return this.fn()
     } finally {
+      endTrack(this)
       activeSub = prevSub
     }
   }
