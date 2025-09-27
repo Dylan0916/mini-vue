@@ -1,14 +1,14 @@
 import { ReactiveFlags } from './constants'
 
 export interface Link {
-  dep: Dep | null
-  sub: Sub | null
+  dep: Dependency | null
+  sub: Subscriber | null
   nextDep: Link | null
   prevSub: Link | null
   nextSub: Link | null
 }
 
-export interface Dep<T = any> {
+export interface Dependency<T = any> {
   [ReactiveFlags.IS_REF]: boolean
   _value: T
   subs: Link
@@ -16,7 +16,7 @@ export interface Dep<T = any> {
   value: T
 }
 
-export interface Sub {
+export interface Subscriber {
   deps: Link
   depsTail: Link
   tracking: boolean

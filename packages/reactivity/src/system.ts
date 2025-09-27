@@ -1,8 +1,8 @@
-import type { Link, Dep, Sub } from './types'
+import type { Link, Dependency, Subscriber } from './types'
 
 let linkPool: Link | null = null
 
-function _createLink(dep: Dep, sub: Sub, nextDep: Link | null): Link {
+function _createLink(dep: Dependency, sub: Subscriber, nextDep: Link | null): Link {
   let newLink = {
     dep,
     sub,
@@ -22,7 +22,7 @@ function _createLink(dep: Dep, sub: Sub, nextDep: Link | null): Link {
   return newLink
 }
 
-function _appendDepLink(sub: Sub, newLink: Link) {
+function _appendDepLink(sub: Subscriber, newLink: Link) {
   if (sub.depsTail) {
     sub.depsTail.nextDep = newLink
   } else {
@@ -31,7 +31,7 @@ function _appendDepLink(sub: Sub, newLink: Link) {
   sub.depsTail = newLink
 }
 
-function _appendSubLink(dep: Dep, newLink: Link) {
+function _appendSubLink(dep: Dependency, newLink: Link) {
   if (dep.subTail) {
     dep.subTail.nextSub = newLink
     newLink.prevSub = dep.subTail
@@ -41,7 +41,7 @@ function _appendSubLink(dep: Dep, newLink: Link) {
   dep.subTail = newLink
 }
 
-export function link(dep: Dep, sub: Sub) {
+export function link(dep: Dependency, sub: Subscriber) {
   const currentDep = sub.depsTail
   const nextDep = currentDep === null ? sub.deps : currentDep.nextDep
 
@@ -57,7 +57,7 @@ export function link(dep: Dep, sub: Sub) {
 }
 
 export function propagate(subs: Link) {
-  const queuedEffect: Sub[] = []
+  const queuedEffect: Subscriber[] = []
   let link = subs
 
   while (link) {
@@ -117,12 +117,12 @@ function clearTracking(link: Link) {
   clearTracking(nextDep)
 }
 
-export function startTrack(sub: Sub) {
+export function startTrack(sub: Subscriber) {
   sub.depsTail = null
   sub.tracking = true
 }
 
-export function endTrack(sub: Sub) {
+export function endTrack(sub: Subscriber) {
   const { depsTail } = sub
 
   if (depsTail) {
