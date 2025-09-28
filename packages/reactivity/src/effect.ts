@@ -1,5 +1,5 @@
 import { startTrack, endTrack } from './system'
-import type { Link, Subscriber } from './types'
+import type { Link, Subscriber } from './models'
 
 export let activeSub: Subscriber | null = null
 

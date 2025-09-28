@@ -1,4 +1,4 @@
-import type { Link, Dependency } from './types'
+import { Dependency } from './models'
 import { ReactiveFlags } from './constants'
 import { activeSub } from './effect'
 import { link, propagate } from './system'
@@ -15,14 +15,12 @@ function triggerRef(dep: Dependency) {
   }
 }
 
-class RefImpl<T> implements Dependency<T> {
+class RefImpl<T> extends Dependency {
   [ReactiveFlags.IS_REF] = true
   _value: T
 
-  subs: Link
-  subTail: Link
-
   constructor(value: T) {
+    super()
     this._value = value
   }
 
