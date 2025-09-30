@@ -1,5 +1,9 @@
-export function isObject<T>(value: T): value is T & Record<string, any> {
+export function isObject(value: unknown): value is Record<string, any> {
   return typeof value === 'object' && value !== null
+}
+
+export function isFunction(value: unknown): value is () => any {
+  return typeof value === 'function'
 }
 
 export function hasChanged<T>(newValue: T, oldValue: T) {

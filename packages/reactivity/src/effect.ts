@@ -1,9 +1,13 @@
 import { startTrack, endTrack } from './system'
-import type { Link, Subscriber } from './types'
+import type { Effect, Link, Subscriber } from './types'
 
 export let activeSub: Subscriber | null = null
 
-export class ReactiveEffect implements Subscriber {
+export function setActiveSub(sub: Subscriber) {
+  activeSub = sub
+}
+
+export class ReactiveEffect implements Effect {
   deps: Link = null
   depsTail: Link = null
   tracking = false
@@ -13,13 +17,13 @@ export class ReactiveEffect implements Subscriber {
   run() {
     const prevSub = activeSub
 
-    activeSub = this
+    setActiveSub(this)
     startTrack(this)
     try {
       return this.fn()
     } finally {
       endTrack(this)
-      activeSub = prevSub
+      setActiveSub(prevSub)
     }
   }
 
@@ -32,7 +36,7 @@ export class ReactiveEffect implements Subscriber {
   }
 }
 
-export function effect(fn: () => any, options?: Pick<Subscriber, 'schedule'>) {
+export function effect(fn: () => any, options?: Pick<Effect, 'schedule'>) {
   const effect = new ReactiveEffect(fn)
 
   Object.assign(effect, options)

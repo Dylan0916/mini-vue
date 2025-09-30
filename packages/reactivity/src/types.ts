@@ -5,6 +5,14 @@ export interface Dependency {
   subTail: Link
 }
 
+export interface Subscriber {
+  deps: Link
+  depsTail: Link
+  tracking: boolean
+  notify: () => void
+  update?: () => void
+}
+
 export interface Link {
   dep: Dependency | null
   sub: Subscriber | null
@@ -19,13 +27,15 @@ export interface Ref<T = any> extends Dependency {
   value: T | Record<string, any>
 }
 
-export interface Subscriber {
-  deps: Link
-  depsTail: Link
-  tracking: boolean
+export interface ComputedRef<T = any> extends Dependency, Subscriber {
+  [ReactiveFlags.IS_REF]: boolean
+  _value: T | Record<string, any>
+  value: T | Record<string, any>
+}
+
+export interface Effect extends Subscriber {
   run: () => any
   schedule: () => void
-  notify: () => void
 }
 
 export type ReactiveTarget = Record<string, any>

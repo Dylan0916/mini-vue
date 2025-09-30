@@ -1,4 +1,4 @@
-import type { Dependency, Link, Subscriber } from './types'
+import type { ComputedRef, Dependency, Link, Subscriber } from './types'
 
 let linkPool: Link | null = null
 
@@ -56,6 +56,12 @@ export function link(dep: Dependency, sub: Subscriber) {
   _appendSubLink(dep, newLink)
 }
 
+// @FIXME: type
+export function processComputedUpdate(sub: any) {
+  sub.update()
+  propagate(sub.subs)
+}
+
 export function propagate(subs: Link) {
   const queuedEffect: Subscriber[] = []
   let link = subs
@@ -64,7 +70,12 @@ export function propagate(subs: Link) {
     const { sub } = link
 
     if (!sub.tracking) {
-      queuedEffect.push(sub)
+      // 如果 link.sub有 update 方法，表是傳入的是 computed
+      if ('update' in sub) {
+        processComputedUpdate(sub)
+      } else {
+        queuedEffect.push(sub)
+      }
     }
 
     link = link.nextSub
