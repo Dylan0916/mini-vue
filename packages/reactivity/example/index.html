@@ -15,19 +15,18 @@
   <script type="module">
     import { ref, reactive, effect } from '../dist/reactivity.esm.js'
 
-    const state = reactive({
-      a: 0,
-      get count(){
-        return this.a
+    const obj = reactive({
+      a: {
+        b: 0
       }
     })
 
     effect(() => {
-      console.log(state.count)
+      console.log(obj.a.b)
     })
 
     setTimeout(() => {
-      state.a = 1
+      obj.a.b = 1
     }, 1000)
   </script>
 </body>

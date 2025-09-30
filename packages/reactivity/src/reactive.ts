@@ -1,47 +1,51 @@
-import { isObject } from '@vue/shared'
+import { isObject, hasChanged } from '@vue/shared'
 
-import { Dependency } from './models'
-import { link, propagate } from './system'
-import { activeSub } from './effect'
+import { isRef } from './ref'
+import { track, trigger } from './dep'
+import { ReactiveTarget, ReactiveProxy } from './types'
 
-const targetMap = new WeakMap<Record<string, any>, Map<string | symbol, Dependency>>()
+const reactiveMap = new WeakMap<ReactiveTarget, ReactiveProxy>()
+const reactiveSet = new Set<ReactiveProxy>()
 
-export function track(target: Record<string, any>, key: string | symbol) {
-  if (!activeSub) {
-    return
-  }
+const mutableHandlers: ProxyHandler<ReactiveTarget> = {
+  get(target, key, receiver) {
+    track(target, key)
 
-  let depsMap = targetMap.get(target)
+    const res = Reflect.get<any, any>(target, key, receiver)
 
-  if (!depsMap) {
-    depsMap = new Map()
-    targetMap.set(target, depsMap)
-  }
+    if (isRef(res)) {
+      return res.value
+    }
+    if (isObject(res)) {
+      return reactive(res)
+    }
 
-  let dep = depsMap.get(key)
+    return res
+  },
+  set(target, key, newValue, receiver) {
+    const oldValue = target[key as string]
 
-  if (!dep) {
-    dep = new Dependency()
-    depsMap.set(key, dep)
-  }
+    /**
+     * const a = ref(0)
+     * target = { a }
+     * 更新 target.a = 1 時，他就等於更新了 a.value
+     * a.value = 1
+     */
+    if (isRef(oldValue) && !isRef(newValue)) {
+      oldValue.value = newValue
 
-  link(dep, activeSub)
-}
+      // 改了 ref 的值，會通知 sub 更新，所以要 return 不然下方 trigger 又會觸發 trigger 更新 會觸發兩次
+      return true
+    }
 
-export function trigger(target: Record<string, any>, key: string | symbol) {
-  const depsMap = targetMap.get(target)
+    const res = Reflect.set(target, key, newValue, receiver)
 
-  if (!depsMap) {
-    return
-  }
+    if (hasChanged(newValue, oldValue)) {
+      trigger(target, key)
+    }
 
-  const dep = depsMap.get(key)
-
-  if (!dep) {
-    return
-  }
-
-  propagate(dep.subs)
+    return res
+  },
 }
 
 export function createReactiveObject<T>(target: T) {
@@ -49,21 +53,30 @@ export function createReactiveObject<T>(target: T) {
     return
   }
 
-  return new Proxy(target, {
-    get(target, key, receiver) {
-      track(target, key)
-      return Reflect.get(target, key, receiver)
-    },
-    set(target, key, newValue, receiver) {
-      const res = Reflect.set(target, key, newValue, receiver)
+  /**
+   * 如果這個 target 儲存在 reactiveSet 中
+   * 表示 target 是一個響應式物件 (proxy)，直接返回已經建立好的 proxy
+   */
+  if (reactiveSet.has(target)) {
+    return target
+  }
 
-      trigger(target, key)
+  if (reactiveMap.has(target)) {
+    return reactiveMap.get(target)
+  }
 
-      return res
-    },
-  })
+  const proxy = new Proxy(target, mutableHandlers)
+
+  reactiveMap.set(target, proxy)
+  reactiveSet.add(proxy)
+
+  return proxy
 }
 
 export function reactive<T>(target: T) {
   return createReactiveObject(target)
+}
+
+export function isReactive<T>(target: T) {
+  return reactiveSet.has(target)
 }
