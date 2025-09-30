@@ -1,6 +1,6 @@
 import { isObject, hasChanged } from '@vue/shared'
 
-import { Dependency, Ref } from './models'
+import type { Dependency, Link, Ref } from './types'
 import { ReactiveFlags } from './constants'
 import { activeSub } from './effect'
 import { link, propagate } from './system'
@@ -18,12 +18,13 @@ function triggerRef(dep: Dependency) {
   }
 }
 
-class RefImpl<T> extends Dependency implements Ref<T> {
+class RefImpl<T> implements Ref<T> {
+  subs: Link | null = null
+  subTail: Link | null = null;
   [ReactiveFlags.IS_REF] = true
   _value: T | Record<string, any>
 
   constructor(value: T) {
-    super()
     this._value = this._toReactive(value)
   }
 

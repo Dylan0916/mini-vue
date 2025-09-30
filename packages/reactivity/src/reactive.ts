@@ -2,7 +2,7 @@ import { isObject, hasChanged } from '@vue/shared'
 
 import { isRef } from './ref'
 import { track, trigger } from './dep'
-import { ReactiveTarget, ReactiveProxy } from './types'
+import type { ReactiveTarget, ReactiveProxy } from './types'
 
 const reactiveMap = new WeakMap<ReactiveTarget, ReactiveProxy>()
 const reactiveSet = new Set<ReactiveProxy>()

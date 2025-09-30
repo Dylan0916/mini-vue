@@ -1,4 +1,4 @@
-import type { Dependency, Link, Subscriber } from './models'
+import type { Dependency, Link, Subscriber } from './types'
 
 let linkPool: Link | null = null
 

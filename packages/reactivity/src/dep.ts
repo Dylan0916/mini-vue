@@ -1,9 +1,13 @@
-import { Dependency } from './models'
 import { link, propagate } from './system'
 import { activeSub } from './effect'
-import type { ReactiveTarget } from './types'
+import type { ReactiveTarget, Dependency, Link } from './types'
 
 const targetMap = new WeakMap<ReactiveTarget, Map<string | symbol, Dependency>>()
+
+class Dep implements Dependency {
+  subs: Link | null = null
+  subTail: Link | null = null
+}
 
 export function track(target: Record<string, any>, key: string | symbol) {
   if (!activeSub) {
@@ -20,7 +24,7 @@ export function track(target: Record<string, any>, key: string | symbol) {
   let dep = depsMap.get(key)
 
   if (!dep) {
-    dep = new Dependency()
+    dep = new Dep()
     depsMap.set(key, dep)
   }
 
