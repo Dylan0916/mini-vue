@@ -58,8 +58,10 @@ export function link(dep: Dependency, sub: Subscriber) {
 
 // @FIXME: type
 export function processComputedUpdate(sub: any) {
-  sub.update()
-  propagate(sub.subs)
+  sub.tracking = true
+  if (sub.subs && sub.update()) {
+    propagate(sub.subs)
+  }
 }
 
 export function propagate(subs: Link) {
@@ -70,7 +72,7 @@ export function propagate(subs: Link) {
     const { sub } = link
 
     if (!sub.tracking) {
-      // 如果 link.sub有 update 方法，表是傳入的是 computed
+      // 如果 link.sub有 update 方法，表示傳入的是 computed
       if ('update' in sub) {
         processComputedUpdate(sub)
       } else {

@@ -9,7 +9,8 @@ export interface Subscriber {
   deps: Link
   depsTail: Link
   tracking: boolean
-  notify: () => void
+  dirty?: boolean
+  notify?: () => void
   update?: () => void
 }
 

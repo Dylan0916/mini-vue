@@ -1,4 +1,4 @@
-import { isFunction } from '@vue/shared'
+import { hasChanged, isFunction } from '@vue/shared'
 
 import { ReactiveFlags } from './constants'
 import { Link, ComputedRef } from './types'
@@ -16,6 +16,7 @@ class ComputedRefImpl<T> implements ComputedRef<T> {
   depsTail: Link | null = null
 
   tracking = false
+  dirty = true
 
   constructor(public fn: () => T, private setter?: (value: T | Record<string, any>) => void) {}
 
@@ -25,7 +26,12 @@ class ComputedRefImpl<T> implements ComputedRef<T> {
     setActiveSub(this)
     startTrack(this)
     try {
+      const oldValue = this._value
+
       this._value = this.fn()
+      this.dirty = false
+
+      return hasChanged(this._value, oldValue)
     } finally {
       endTrack(this)
       setActiveSub(prevSub)
@@ -35,7 +41,9 @@ class ComputedRefImpl<T> implements ComputedRef<T> {
   notify() {}
 
   get value() {
-    this.update()
+    if (this.dirty) {
+      this.update()
+    }
 
     if (activeSub) {
       link(this, activeSub)
